@@ -1,4 +1,4 @@
-﻿Imports System.Collections
+Imports System.Collections
 Imports System.Collections.Generic
 Imports System.Diagnostics
 Imports System.Linq
@@ -15,22 +15,146 @@ Namespace Crc
         ''' <summary>
         ''' Стандартные алгоритмы расчёта контрольной суммы.
         ''' </summary>
-        Public Enum CrcPresetEnum As Integer
+        Public Enum CrcPresets As Integer
             CRC8
             CRC16
-            CRC_CITT
-            XMODEM
             CRC32
+            CRC8_CDMA2000
+            CRC8_DARC
+            CRC8_DVB
+            CRC8_EBU
+            CRC8_ICODE
+            CRC8_ITU
+            CRC8_MAXIM
+            CRC8_ROHC
+            CRC8_WCDMA
+            CRC16_AUG
+            CRC16_BUYPASS
+            CRC16_CCITT
+            CRC16_CDMA2000
+            CRC16_DDS
+            CRC16_DECTR
+            CRC16_DECTX
+            CRC16_DNP
+            CRC16_EN13757
+            CRC16_GENIBUS
+            CRC16_MAXIM
+            CRC16_MCRF4XX
+            CRC16_RIELLO
+            CRC16_T10DIF
+            CRC16_TELEDISK
+            CRC16_TMS37157
+            CRC16_USB
+            CRC16_CRCA
+            CRC16_KERMIT
+            CRC16_MODBUS
+            CRC16_X25
+            CRC16_XMODEM
+            CRC32_BZIP2
+            CRC32_C
+            CRC32_D
+            CRC32_MPEG2
+            CRC32_POSIX
+            CRC32_Q
+            CRC32_JAMCRC
+            CRC32_XFER
         End Enum
+
+        Public ReadOnly Property ProfileNames As Dictionary(Of CrcPresets, String)
+            Get
+                If (_ProfileNames.Count = 0) Then
+                    For Each kvp In Profiles
+                        _ProfileNames.Add(kvp.Key, Profiles(kvp.Key).Title)
+                    Next
+                End If
+                Return _ProfileNames
+            End Get
+        End Property
+        Private _ProfileNames As New Dictionary(Of CrcPresets, String)
+
+        ''' <summary>
+        ''' Список стандартных параметров для расчёта CRC.
+        ''' </summary>
+        Public ReadOnly Property Profiles As New Dictionary(Of CrcPresets, CrcParams) From {
+            {CrcPresets.CRC8, New CrcParams("CRC-8", 8, &H7, 0, False, False, 0)},
+            {CrcPresets.CRC16, New CrcParams("CRC-16/ARC", 16, &H8005, 0, True, True, 0)},
+            {CrcPresets.CRC32, New CrcParams("CRC-32/zlib", 32, &H4C11DB7, &HFFFFFFFFUI, True, True, &HFFFFFFFFUI)},
+            {CrcPresets.CRC8_CDMA2000, New CrcParams("CRC-8/CDMA2000", 8, &H9B, &HFF, False, False, 0)},
+            {CrcPresets.CRC8_DARC, New CrcParams("CRC-8/DARC", 8, &H39, 0, True, True, 0)},
+            {CrcPresets.CRC8_DVB, New CrcParams("CRC-8/DVB-S2", 8, &HD5, 0, False, False, 0)},
+            {CrcPresets.CRC8_EBU, New CrcParams("CRC-8/EBU", 8, &H1D, &HFF, True, True, 0)},
+            {CrcPresets.CRC8_ICODE, New CrcParams("CRC-8/I-CODE", 8, &H1D, &HFD, False, False, 0)},
+            {CrcPresets.CRC8_ITU, New CrcParams("CRC-8/ITU", 8, &H7, 0, False, False, &H55)},
+            {CrcPresets.CRC8_MAXIM, New CrcParams("CRC-8/MAXIM", 8, &H31, 0, True, True, 0)},
+            {CrcPresets.CRC8_ROHC, New CrcParams("CRC-8/ROHC", 8, &H7, &HFF, True, True, 0)},
+            {CrcPresets.CRC8_WCDMA, New CrcParams("CRC-8/WCDMA", 8, &H9B, 0, True, True, 0)},
+            {CrcPresets.CRC16_AUG, New CrcParams("CRC-16/AUG-CCITT", 16, &H1021, &H1D0F, False, False, 0)},
+            {CrcPresets.CRC16_BUYPASS, New CrcParams("CRC-16/BUYPASS", 16, &H8005, 0, False, False, 0)},
+            {CrcPresets.CRC16_CCITT, New CrcParams("CRC-16/CCITT-FALSE", 16, &H1021, &HFFFF, False, False, 0)},
+            {CrcPresets.CRC16_CDMA2000, New CrcParams("CRC-16/CDMA2000", 16, &HC867, &HFFFF, False, False, 0)},
+            {CrcPresets.CRC16_DDS, New CrcParams("CRC-16/DDS-110", 16, &H8005, &H800D, False, False, 0)},
+            {CrcPresets.CRC16_DECTR, New CrcParams("CRC-16/DECT-R", 16, &H589, 0, False, False, &H1)},
+            {CrcPresets.CRC16_DECTX, New CrcParams("CRC-16/DECT-X", 16, &H589, 0, False, False, 0)},
+            {CrcPresets.CRC16_DNP, New CrcParams("CRC-16/DNP", 16, &H3D65, 0, True, True, &HFFFF)},
+            {CrcPresets.CRC16_EN13757, New CrcParams("CRC-16/EN-13757", 16, &H3D65, 0, False, False, &HFFFF)},
+            {CrcPresets.CRC16_GENIBUS, New CrcParams("CRC-16/GENIBUS", 16, &H1021, &HFFFF, False, False, &HFFFF)},
+            {CrcPresets.CRC16_MAXIM, New CrcParams("CRC-16/MAXIM", 16, &H8005, 0, True, True, &HFFFF)},
+            {CrcPresets.CRC16_MCRF4XX, New CrcParams("CRC-16/MCRF4XX", 16, &H1021, &HFFFF, True, True, 0)},
+            {CrcPresets.CRC16_RIELLO, New CrcParams("CRC-16/RIELLO", 16, &H1021, &HB2AA, True, True, 0)},
+            {CrcPresets.CRC16_T10DIF, New CrcParams("CRC-16/T10-DIF", 16, &H8BB7, 0, False, False, 0)},
+            {CrcPresets.CRC16_TELEDISK, New CrcParams("CRC-16/TELEDISK", 16, &HA097, 0, False, False, 0)},
+            {CrcPresets.CRC16_TMS37157, New CrcParams("CRC-16/TMS37157", 16, &H1021, &H89EC, True, True, 0)},
+            {CrcPresets.CRC16_USB, New CrcParams("CRC-16/USB", 16, &H8005, &HFFFF, True, True, &HFFFF)},
+            {CrcPresets.CRC16_CRCA, New CrcParams("CRC-A", 16, &H1021, &HC6C6, True, True, 0)},
+            {CrcPresets.CRC16_KERMIT, New CrcParams("CRC-16/KERMIT", 16, &H1021, 0, True, True, 0)},
+            {CrcPresets.CRC16_MODBUS, New CrcParams("CRC-16/MODBUS", 16, &H8005, &HFFFF, True, True, 0)},
+            {CrcPresets.CRC16_X25, New CrcParams("CRC-16/X-25", 16, &H1021, &HFFFF, True, True, &HFFFF)},
+            {CrcPresets.CRC16_XMODEM, New CrcParams("CRC-16/XMODEM", 16, &H1021, 0, False, False, 0)},
+            {CrcPresets.CRC32_BZIP2, New CrcParams("CRC-32/BZIP2", 32, &H4C11DB7, &HFFFFFFFFUI, False, False, &HFFFFFFFFUI)},
+            {CrcPresets.CRC32_C, New CrcParams("CRC-32C", 32, &H1EDC6F41, &HFFFFFFFFUI, True, True, &HFFFFFFFFUI)},
+            {CrcPresets.CRC32_D, New CrcParams("CRC-32D", 32, &HA833982BUI, &HFFFFFFFFUI, True, True, &HFFFFFFFFUI)},
+            {CrcPresets.CRC32_MPEG2, New CrcParams("CRC-32/MPEG-2", 32, &H4C11DB7, &HFFFFFFFFUI, False, False, 0)},
+            {CrcPresets.CRC32_POSIX, New CrcParams("CRC-32/POSIX", 32, &H4C11DB7, 0, False, False, &HFFFFFFFFUI)},
+            {CrcPresets.CRC32_Q, New CrcParams("CRC-32Q", 32, &H814141ABUI, 0, False, False, 0)},
+            {CrcPresets.CRC32_JAMCRC, New CrcParams("CRC-32/JAMCRC", 32, &H4C11DB7, &HFFFFFFFFUI, True, True, 0)},
+            {CrcPresets.CRC32_XFER, New CrcParams("CRC-32/XFER", 32, &HAF, 0, False, False, 0)}
+        }
+
+        ''' <summary>
+        ''' Контейнер для хранения настроек для расчёта CRC.
+        ''' </summary>
+        Public Class CrcParams
+
+            Public Property Title As String
+            Public Property Polynom As UInteger
+            Public Property InitRegister As UInteger
+            Public Property XorOut As UInteger
+            Public Property CrcWidth As Integer
+            Public Property ReflectIn As Boolean
+            Public Property ReflectOut As Boolean
+
+            Public Sub New(title As String, width As Integer, poly As UInteger, initReg As UInteger, refIn As Boolean, refOut As Boolean, xorOut As UInteger)
+                Me.Title = title
+                Me.CrcWidth = width
+                Me.Polynom = poly
+                Me.InitRegister = initReg
+                Me.XorOut = xorOut
+                Me.ReflectIn = refIn
+                Me.ReflectOut = refOut
+            End Sub
+
+        End Class
 
 #End Region '/NESTED TYPES
 
-        <Obsolete("То же, что и CrcWidth, только статическое. Использовать с опаской, т.к. небезопасно.")>
-        Public Shared ReadOnly Property CrcBitness As Integer
-            Get
-                Return _CrcWidth
-            End Get
-        End Property
+#Region "EVENTS"
+
+        ''' <summary>
+        ''' Уведомление об изменении параметров CRC, что должно служить триггером для пересчёта КС.
+        ''' </summary>
+        Public Event CrcParametersChanged()
+
+#End Region '/EVENTS
 
 #Region "PROPS AND FIELDS"
 
@@ -50,21 +174,37 @@ Namespace Crc
             Set(value As Integer)
                 If (_CrcWidth <> value) Then
                     _CrcWidth = value
-                    _TopBit = GetBitMask(CrcWidth - 1)
-                    _WidMask = (((1UI << (CrcWidth - 1)) - 1UI) << 1) Or 1UI
+                    _StaticLastUsedCrcWidth = value
                     Polynom = Polynom And WidMask
                     InitRegister = InitRegister And WidMask
                     XorOut = XorOut And WidMask
                     GenerateLookupTable()
+                    RaiseEvent CrcParametersChanged()
                 End If
             End Set
         End Property
-        Private Shared _CrcWidth As Integer = 32
+        Private _CrcWidth As Integer = 32
+        Private Shared _StaticLastUsedCrcWidth As Integer = 32
+
+        ''' <summary>
+        ''' Последняя использованная разрядность контрольной суммы (статический метод!).
+        ''' </summary>
+        Public Shared Function GetLastUsedCrcBitness() As Integer
+            Return _StaticLastUsedCrcWidth
+        End Function
 
         ''' <summary>
         ''' Образующий многочлен.
-        ''' Изменение этого свойства ведёт к пересчёту таблицы.
         ''' </summary>
+        ''' <remarks>
+        ''' Это битовая величина, которая для удобства может быть представлена шестнадцатеричным числом. 
+        ''' Старший бит при этом опускается. 
+        ''' Например, если используется полином 10110, то он обозначается числом "06h". 
+        ''' Важной особенностью данного параметра является то, что он всегда представляет собой необращенный полином, 
+        ''' младшая часть этого параметра во время вычислений всегда является наименее значащими битами делителя вне зависимости от того, 
+        ''' какой – "зеркальный" или прямой алгоритм моделируется.
+        ''' Изменение этого свойства ведёт к пересчёту таблицы.
+        ''' </remarks>
         Public Property Polynom As UInteger
             Get
                 Return _Polynom
@@ -73,6 +213,7 @@ Namespace Crc
                 If (_Polynom <> value) Then
                     _Polynom = value
                     GenerateLookupTable()
+                    RaiseEvent CrcParametersChanged()
                 End If
             End Set
         End Property
@@ -80,8 +221,13 @@ Namespace Crc
 
         ''' <summary>
         ''' Обращать байты сообщения?
-        ''' Изменение этого свойства ведёт к пересчёту таблицы.
         ''' </summary>
+        ''' <remarks>
+        ''' Логический параметр. Если он имеет значение "False" ("Ложь"), байты сообщения обрабатываются, начиная с 7 бита, 
+        ''' который считается наиболее значащим, а наименее значащим считается бит 0. 
+        ''' Если параметр имеет значение "True" ("Истина"), то каждый байт перед обработкой обращается.
+        ''' Изменение этого свойства ведёт к пересчёту таблицы.
+        ''' </remarks>
         Public Property ReflectIn As Boolean
             Get
                 Return _ReflectIn
@@ -90,6 +236,7 @@ Namespace Crc
                 If (_ReflectIn <> value) Then
                     _ReflectIn = value
                     GenerateLookupTable()
+                    RaiseEvent CrcParametersChanged()
                 End If
             End Set
         End Property
@@ -98,6 +245,13 @@ Namespace Crc
         ''' <summary>
         ''' Начальное одержимое регситра.
         ''' </summary>
+        ''' <remarks>
+        ''' Определяет исходное содержимое регистра на момент запуска вычислений. 
+        ''' Именно это значение должно быть занесено в регистр в прямой табличном алгоритме. 
+        ''' В принципе, в табличных алгоритмах мы всегда может считать, 
+        ''' что регистр инициализируется нулевым значением, а начальное значение комбинируется по Xor с содержимым регистра после N цикла. 
+        ''' Данный параметр указывается шестнадцатеричным числом.
+        ''' </remarks>
         Public Property InitRegister As UInteger
             Get
                 Return _InitRegister
@@ -105,6 +259,7 @@ Namespace Crc
             Set(value As UInteger)
                 If (_InitRegister <> value) Then
                     _InitRegister = value
+                    RaiseEvent CrcParametersChanged()
                 End If
             End Set
         End Property
@@ -113,6 +268,12 @@ Namespace Crc
         ''' <summary>
         ''' Обращать выходное значение CRC?
         ''' </summary>
+        ''' <remarks>
+        ''' Логический параметр. Если он имеет значение "False" ("Ложь"), 
+        ''' то конечное содержимое регистра сразу передается на стадию XorOut, 
+        ''' в противном случае, когда параметр имеет значение "True" ("Истина"), 
+        ''' содержимое регистра обращается перед передачей на следующую стадию вычислений.
+        ''' </remarks>
         Public Property ReflectOut As Boolean
             Get
                 Return _ReflectOut
@@ -120,6 +281,7 @@ Namespace Crc
             Set(value As Boolean)
                 If (_ReflectOut <> value) Then
                     _ReflectOut = value
+                    RaiseEvent CrcParametersChanged()
                 End If
             End Set
         End Property
@@ -128,6 +290,11 @@ Namespace Crc
         ''' <summary>
         ''' Значение, с которым XOR-ится выходное значение CRC.
         ''' </summary>
+        ''' <remarks>
+        ''' W битное значение, обозначаемое шестнадцатеричным числом. 
+        ''' Оно комбинируется с конечным содержимым регистра (после стадии RefOut), 
+        ''' прежде чем будет получено окончательное значение контрольной суммы.
+        ''' </remarks>
         Public Property XorOut As UInteger
             Get
                 Return _XorOut
@@ -135,6 +302,7 @@ Namespace Crc
             Set(value As UInteger)
                 If (_XorOut <> value) Then
                     _XorOut = value
+                    RaiseEvent CrcParametersChanged()
                 End If
             End Set
         End Property
@@ -143,81 +311,42 @@ Namespace Crc
         ''' <summary>
         ''' Профиль с настройками CRC для некоторых популярных стандартных параметрических моделей.
         ''' </summary>
-        Public Property Profile As CrcPresetEnum
+        Public Property Profile As CrcPresets
             Get
                 Return _Profile
             End Get
-            Set(value As CrcPresetEnum)
+            Set(value As CrcPresets)
                 If (_Profile <> value) Then
+                    If (Not Profiles.ContainsKey(value)) Then
+                        Throw New NotImplementedException($"Профиль {value} не определён.")
+                    End If
                     _Profile = value
-                    Select Case value
-                        Case CrcPresetEnum.CRC32
-                            Polynom = &H4C11DB7
-                            InitRegister = &HFFFFFFFFUI
-                            XorOut = &HFFFFFFFFUI
-                            CrcWidth = 32
-                            ReflectIn = True
-                            ReflectOut = True
-                        Case CrcPresetEnum.CRC16
-                            Polynom = &H8005
-                            InitRegister = 0
-                            XorOut = 0
-                            CrcWidth = 16
-                            ReflectIn = True
-                            ReflectOut = True
-                        Case CrcPresetEnum.CRC_CITT
-                            Polynom = &H1021
-                            InitRegister = &HFFFF
-                            XorOut = 0
-                            CrcWidth = 16
-                            ReflectIn = False
-                            ReflectOut = False
-                        Case CrcPresetEnum.XMODEM
-                            Polynom = &H8408
-                            InitRegister = 0
-                            XorOut = 0
-                            CrcWidth = 16
-                            ReflectIn = True
-                            ReflectOut = True
-                        Case CrcPresetEnum.CRC8
-                            Polynom = &H7
-                            InitRegister = 0
-                            XorOut = 0
-                            CrcWidth = 8
-                            ReflectIn = False
-                            ReflectOut = False
-                        Case Else
-                            Throw New NotImplementedException("Профиль не определён")
-                    End Select
+
+                    Polynom = Profiles(value).Polynom
+                    InitRegister = Profiles(value).InitRegister
+                    XorOut = Profiles(value).XorOut
+                    CrcWidth = Profiles(value).CrcWidth
+                    ReflectIn = Profiles(value).ReflectIn
+                    ReflectOut = Profiles(value).ReflectOut
+
+                    RaiseEvent CrcParametersChanged()
                 End If
             End Set
         End Property
-        Private _Profile As CrcPresetEnum = CrcPresetEnum.CRC32
+        Private _Profile As CrcPresets = CrcPresets.CRC32
 
 #End Region '/PROPS AND FIELDS
 
 #Region "READ-ONLY PROPS"
 
         ''' <summary>
-        ''' Возвращает старший разряд полинома.
-        ''' </summary>
-        ReadOnly Property TopBit As UInteger
-            Get
-                Return _TopBit
-                'Return getBitMask(CrcWidth - 1) 'рассчитываем один раз при изменении порядка полинома.
-            End Get
-        End Property
-        Private _TopBit As UInteger = GetBitMask(CrcWidth - 1)
-
-        ''' <summary>
         ''' Возвращает длинное слово со значением (2^width)-1.
         ''' </summary>
         Private ReadOnly Property WidMask As UInteger
             Get
-                Return _WidMask
+                Return (((1UI << (CrcWidth - 1)) - 1UI) << 1) Or 1UI
             End Get
         End Property
-        Private _WidMask As UInteger = (((1UI << (CrcWidth - 1)) - 1UI) << 1) Or 1UI
 
 #End Region '/READ-ONLY PROPS
 
@@ -234,7 +363,7 @@ Namespace Crc
         ''' Initializes a new instance of the <see cref="RocksoftCrcModel"/> class.
         ''' </summary>
         ''' <param name="crcParamsModel">Заданная параметрическая модель CRC.</param>
-        Public Sub New(crcParamsModel As CrcPresetEnum)
+        Public Sub New(crcParamsModel As CrcPresets)
             Me.Profile = crcParamsModel
         End Sub
 
@@ -247,11 +376,11 @@ Namespace Crc
         ''' <param name="isReflectIn">Обращать ли входящие байты сообщения?</param>
         ''' <param name="isReflectOut">Обратить ли CRC перед финальным XOR.</param>
         ''' <param name="xorOut">Конечное значение XOR.</param>
-        Public Sub New(ByVal width As Integer, ByVal poly As UInteger,
-                       Optional ByVal initReg As UInteger = &HFFFFFFFFUI,
-                       Optional ByVal isReflectIn As Boolean = True,
-                       Optional ByVal isReflectOut As Boolean = True,
-                       Optional ByVal xorOut As UInteger = &HFFFFFFFFUI)
+        Public Sub New(width As Integer, poly As UInteger,
+                       Optional initReg As UInteger = &HFFFFFFFFUI,
+                       Optional isReflectIn As Boolean = True,
+                       Optional isReflectOut As Boolean = True,
+                       Optional xorOut As UInteger = &HFFFFFFFFUI)
             Me.CrcWidth = width
             Me.Polynom = poly
             Me.InitRegister = initReg
@@ -264,6 +393,15 @@ Namespace Crc
 #End Region '/CTOR
 
 #Region "ВЫЧИСЛЕНИЕ CRC"
+
+        Public Function ComputeCrcByTable(ByRef message As Byte()) As UInteger 'TEST 
+            Dim registerContent As UInteger = InitRegister 'Содержимое регистра в процессе пересчёта CRC.
+            For Each b As Byte In message
+                registerContent = GetNextRegisterContent(registerContent, b)
+            Next
+            Dim finalCrc As UInteger = GetFinalCrc(registerContent)
+            Return finalCrc
+        End Function
 
         ''' <summary>
         ''' Вычисляет значение контрольной суммы переданного сообщения.
@@ -346,6 +484,13 @@ Namespace Crc
             End If
         End Function
 
+        ''' <summary>
+        ''' Возвращает старший разряд полинома.
+        ''' </summary>
+        Private Function TopBit() As UInteger
+            Return GetBitMask(CrcWidth - 1)
+        End Function
+
 #End Region '/ВЫЧИСЛЕНИЕ CRC
 
 #Region "РАСЧЁТ ТАБЛИЦЫ"
@@ -364,7 +509,7 @@ Namespace Crc
         ''' по алгоритму Rocksoft^tm Model CRC Algorithm.
         ''' </summary>
         ''' <param name="index">Индекс записи в таблице, 0..255.</param>
-        Private Function GenerateTableItem(ByVal index As Integer) As UInteger
+        Private Function GenerateTableItem(index As Integer) As UInteger
 
             Dim inbyte As UInteger = CUInt(index)
 
@@ -374,8 +519,9 @@ Namespace Crc
 
             Dim reg As UInteger = inbyte << (CrcWidth - 8)
 
+            Dim msb As UInteger = TopBit
             For i As Integer = 0 To 7
-                If ((reg And TopBit) = TopBit) Then
+                If ((reg And msb) = msb) Then
                     reg = (reg << 1) Xor Polynom
                 Else
                     reg <<= 1
@@ -399,7 +545,7 @@ Namespace Crc
         ''' Преобразует CRC из числа в массив байтов.
         ''' </summary>
         ''' <param name="crc"></param>
-        Public Shared Function ConvertCrc(ByVal crc As UInteger, Optional ByVal width As Integer = 32) As Byte()
+        Public Shared Function ConvertCrc(crc As UInteger, Optional width As Integer = 32) As Byte()
             Dim crcBytes As Byte() = BitConverter.GetBytes(crc)
             Select Case width
                 Case 8
@@ -415,8 +561,8 @@ Namespace Crc
         ''' Преобразует CRC из массива байтов в число.
         ''' </summary>
         ''' <param name="crc"></param>
-        Public Shared Function ConvertCrc(ByVal crc As Byte()) As UInteger
-            Dim crcNumber As UInteger = 0
+        Public Shared Function ConvertCrc(crc As Byte()) As UInteger
+            Dim crcNumber As UInteger
             Select Case crc.Length
                 Case 1
                     crcNumber = crc(0)
@@ -432,14 +578,13 @@ Namespace Crc
             Return crcNumber
         End Function
 
-
         ''' <summary>
         ''' Обращает заданное число младших битов переданного числа.
         ''' </summary>
         ''' <param name="value">Число, которое требуется обратить ("отзеркалить").</param>
         ''' <param name="bitsToReflect">Сколько младших битов числа обратить, 0..32.</param>
         ''' <remarks>Например: reflect(0x3E23, 3) == 0x3E26.</remarks>
-        Private Shared Function Reflect(ByVal value As UInteger, Optional ByVal bitsToReflect As Integer = 32) As UInteger
+        Private Shared Function Reflect(value As UInteger, Optional bitsToReflect As Integer = 32) As UInteger
             Dim t As UInteger = value
             Dim reflected As UInteger = value
             For i As Integer = 0 To bitsToReflect - 1
@@ -458,7 +603,7 @@ Namespace Crc
         ''' Возвращает наибольший разряд числа.
         ''' </summary>
         ''' <param name="number">Число, разрядность которого следует определить, степень двойки.</param>
-        Private Shared Function GetBitMask(ByVal number As Integer) As UInteger
+        Private Shared Function GetBitMask(number As Integer) As UInteger
             Dim res As UInteger = (1UI << number)
             Return res
         End Function
@@ -468,13 +613,23 @@ Namespace Crc
         ''' </summary>
         ''' <param name="int">Целое неотрицательное число.</param>
         ''' <remarks>Метод GetBytes() возвращает байты не в том порядке, который нужен.</remarks>
-        Private Shared Function GetBytesFromInt(ByVal int As UInteger) As Byte()
+        Private Shared Function GetBytesFromInt(int As UInteger) As Byte()
             Dim bytes As Byte() = BitConverter.GetBytes(int)
             Dim bytesOrdered(bytes.Length - 1) As Byte
             For i As Integer = 0 To bytes.Length - 1
                 bytesOrdered(i) = bytes(bytes.Length - 1 - i)
             Next
             Return bytesOrdered
+        End Function
+
+        Public Overrides Function ToString() As String
+            Dim sb As New Text.StringBuilder()
+            sb.Append($"{Polynom:X}, ")
+            sb.Append($"{InitRegister:X}, ")
+            sb.Append($"{XorOut:X}, ")
+            sb.Append($"{ReflectIn:D1}, ")
+            sb.Append($"{ReflectOut:D1}")
+            Return sb.ToString()
         End Function
 
 #End Region '/ВСПОМОГАТЕЛЬНЫЕ
@@ -488,10 +643,10 @@ Namespace Crc
         ''' <param name="poly">Образующий многочлен разрядности <paramref name="width">width</paramref>.</param>
         ''' <param name="width">Порядок CRC в битах.</param>
         ''' <returns>По статье Ross N. Williams: "A Painless Guide to CRC Error Detection Algorithms".</returns>
-        Public Shared Function ComputeCrcBitwise(ByVal bytes As Byte(), ByVal poly As UInteger,
-                                                 Optional ByVal width As Integer = 32,
-                                                 Optional ByVal initReg As UInteger = &HFFFFFFFFUI, Optional ByVal finalXor As UInteger = &HFFFFFFFFUI,
-                                                 Optional ByVal reverseBytes As Boolean = True, Optional ByVal reverseCrc As Boolean = True) As UInteger
+        Public Shared Function ComputeCrcBitwise(bytes As Byte(), poly As UInteger,
+                                                 Optional width As Integer = 32,
+                                                 Optional initReg As UInteger = &HFFFFFFFFUI, Optional finalXor As UInteger = &HFFFFFFFFUI,
+                                                 Optional reverseBytes As Boolean = True, Optional reverseCrc As Boolean = True) As UInteger
 
             Dim widthInBytes As Integer = width \ 8
 
@@ -542,7 +697,7 @@ Namespace Crc
                     shiftedBit = shiftedBit Xor b
                 End If
 
-                register = register << 1
+                register <<= 1
                 register = register Or shiftedBit
 
                 If (poppedBit = 1) Then
@@ -573,10 +728,10 @@ Namespace Crc
         ''' <param name="poly">Образующий многочлен разрядности <paramref name="crcWidth">width</paramref>.</param>
         ''' <param name="crcWidth">Порядок CRC в битах.</param>
         ''' <returns>По статье Ross N. Williams: "A Painless Guide to CRC Error Detection Algorithms".</returns>
-        Public Shared Function ComputeCrcBitwise(ByVal ba As BitArray, ByVal registerBitness As Integer, ByVal poly As UInteger,
-                                                 Optional ByVal crcWidth As Integer = 32,
-                                                 Optional ByVal initReg As UInteger = &HFFFFFFFFUI, Optional ByVal finalXor As UInteger = &HFFFFFFFFUI,
-                                                 Optional ByVal reverseBytes As Boolean = True, Optional ByVal reverseCrc As Boolean = True) As UInteger
+        Public Shared Function ComputeCrcBitwise(ba As BitArray, registerBitness As Integer, poly As UInteger,
+                                                 Optional crcWidth As Integer = 32,
+                                                 Optional initReg As UInteger = &HFFFFFFFFUI, Optional finalXor As UInteger = &HFFFFFFFFUI,
+                                                 Optional reverseBytes As Boolean = True, Optional reverseCrc As Boolean = True) As UInteger
 
             'Создаём очередь битов из сообщения:
             Dim msgFifo As New Queue(Of Boolean)
@@ -653,6 +808,7 @@ Namespace Crc
         End Function '/ComputeCrcBitwise
 
 #End Region '/CRC SIMPLE - РАСЧЁТ МЕТОДОМ ПОБИТОВОГО СДВИГА"
+
 
     End Class '/Crc.RocksoftCrc
 
