@@ -8,7 +8,7 @@ This project realizes algorithm of CRC count by **Rocksoft Model CRC**.
 
 Example:
 
-```
+```vbnet
 Dim crcModel As New Crc.RocksoftCrcModel(CrcPresets.CRC16_CCITT)
 Dim c As UInteger = crcModel.ComputeCrc(messageBytes)
 ```
