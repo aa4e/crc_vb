@@ -10,5 +10,5 @@ Example:
 
 ```vbnet
 Dim crcModel As New Crc.RocksoftCrcModel(CrcPresets.CRC16_CCITT)
-Dim c As UInteger = crcModel.ComputeCrc(messageBytes)
+Dim c As ULong = crcModel.ComputeCrc(messageBytes)
 ```
